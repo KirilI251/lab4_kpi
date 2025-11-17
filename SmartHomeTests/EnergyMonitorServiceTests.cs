@@ -169,5 +169,31 @@ namespace SmartHomeTests
                 It.Is<string>(msg => msg.Contains("Overload detected"))
             ), Times.Once());
         }
+
+        /// <summary>
+        /// Тест перевіряє, що метод UpdateEnergyLimit викликає UpdatePlan
+        /// у репозиторії з об'єктом плану, що містить новий ліміт.
+        /// </summary>
+        [Fact]
+        public void UpdateEnergyLimit_ShouldCallUpdatePlan_WithCorrectNewLimit()
+        {
+            // Arrange
+            double newLimit = 10.5;
+            
+            // Створюємо "старий" план, який сервіс отримає
+            var existingPlan = new EnergyPlan { DailyLimitKwh = 5.0 };
+            _planRepo.Setup(repo => repo.GetCurrentPlan()).Returns(existingPlan);
+
+            // Act
+            _service.UpdateEnergyLimit(newLimit);
+
+            // Assert
+            // Перевіряємо, що _planRepo.UpdatePlan був викликаний з об'єктом,
+            // у якого DailyLimitKwh == newLimit
+            // (Тип перевірки: It.Is<EnergyPlan>(predicate) - наш 13-й унікальний тип)
+            _planRepo.Verify(repo => repo.UpdatePlan(
+                It.Is<EnergyPlan>(plan => plan.DailyLimitKwh == newLimit)
+            ), Times.Once());
+        }
     }
 }
