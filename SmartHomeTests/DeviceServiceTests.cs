@@ -97,5 +97,38 @@ namespace SmartHomeTests
             // Додаткова перевірка: переконатися, що Update НЕ викликався
             _deviceRepo.Verify(repo => repo.Update(It.IsAny<Device>()), Times.Never());
         }
+
+        /// <summary>
+        /// Тест перевіряє, що метод GetActiveDevices повертає список, 
+        /// який містить *лише* увімкнені пристрої.
+        /// </summary>
+        [Fact]
+        public void GetActiveDevices_ShouldReturnOnlyOnDevices_WhenCalled()
+        {
+            // Arrange
+            var deviceOn = new Device { Id = 1, Name = "Lamp", IsOn = true };
+            var deviceOff = new Device { Id = 2, Name = "TV", IsOn = false };
+            var allDevices = new List<Device> { deviceOn, deviceOff };
+
+            // Налаштовуємо мок-репозиторій:
+            // Коли буде викликаний GetAll(), він поверне наш повний список
+            _deviceRepo.Setup(repo => repo.GetAll()).Returns(allDevices);
+
+            // Act
+            var result = _service.GetActiveDevices();
+
+            // Assert
+            // 1. Перевіряємо, що результат не 'null'
+            // (Тип перевірки: Assert.NotNull - наш 7-й унікальний тип)
+            Assert.NotNull(result);
+
+            // 2. Перевіряємо, що в результаті *лише* 1 пристрій
+            // (Тип перевірки: Assert.Equal - 5-й унікальний тип)
+            Assert.Equal(1, result.Count());
+
+            // 3. Перевіряємо, що в результаті є саме той, що увімкнений
+            // (Тип перевірки: Assert.Contains - 6-й унікальний тип)
+            Assert.Contains(deviceOn, result);
+        }
     }
 }
