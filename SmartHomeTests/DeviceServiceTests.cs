@@ -47,5 +47,30 @@ namespace SmartHomeTests
             //    був викликаний рівно 1 раз. (Тип перевірки: Verify(..., Times.Exactly(1)))
             _deviceRepo.Verify(repo => repo.Update(device), Times.Exactly(1));
         }
+
+        /// <summary>
+        /// Тест перевіряє, що метод ToggleDevice коректно вимикає пристрій (повертає false).
+        /// </summary>
+        [Fact]
+        public void ToggleDevice_ShouldTurnDeviceOff_WhenCalledWithFalse()
+        {
+            // Arrange
+            // Цього разу пристрій спочатку увімкнений
+            var device = new Device { Id = 2, Name = "TV", IsOn = true };
+            int deviceId = 2;
+
+            _deviceRepo.Setup(repo => repo.GetById(deviceId)).Returns(device);
+
+            // Act
+            bool result = _service.ToggleDevice(deviceId, false);
+
+            // Assert
+            // 1. Перевіряємо, що метод повернув 'false'
+            // (Тип перевірки: Assert.False - наш 3-й унікальний тип)
+            Assert.False(result);
+
+            // 2. Також перевіряємо, що Update було викликано
+            _deviceRepo.Verify(repo => repo.Update(device), Times.Once());
+        }
     }
 }
