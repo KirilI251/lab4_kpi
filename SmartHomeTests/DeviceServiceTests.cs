@@ -156,5 +156,28 @@ namespace SmartHomeTests
             // (Тип перевірки: Assert.Empty - наш 8-й унікальний тип)
             Assert.Empty(result);
         }
+
+        /// <summary>
+        /// Тест перевіряє, що стан пристрою (IsOn) змінюється
+        /// на протилежний після виклику ToggleDevice.
+        /// </summary>
+        [Fact]
+        public void ToggleDevice_ShouldChangeDeviceState_WhenToggled()
+        {
+            // Arrange
+            var device = new Device { Id = 1, Name = "Lamp", IsOn = false };
+            bool initialState = device.IsOn; // Запам'ятовуємо початковий стан (false)
+
+            _deviceRepo.Setup(repo => repo.GetById(device.Id)).Returns(device);
+
+            // Act
+            // Викликаємо метод, щоб увімкнути пристрій
+            _service.ToggleDevice(device.Id, true); 
+
+            // Assert
+            // Перевіряємо, що новий стан (device.IsOn) НЕ дорівнює початковому
+            // (Тип перевірки: Assert.NotEqual - наш 15-й унікальний тип)
+            Assert.NotEqual(initialState, device.IsOn);
+        }
     }
 }
