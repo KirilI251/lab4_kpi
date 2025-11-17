@@ -114,5 +114,32 @@ namespace SmartHomeTests
             // Це наш 10-й унікальний тип перевірки.
             _notify.Verify(n => n.SendAlert(It.IsAny<string>()), Times.Once());
         }
+
+        /// <summary>
+        /// Тест перевіряє, що метод CheckForOverload НЕ відправляє сповіщення,
+        /// коли споживання енергії знаходиться в межах ліміту.
+        /// </summary>
+        [Fact]
+        public void CheckForOverload_ShouldNotSendAlert_WhenUsageIsWithinLimit()
+        {
+            // Arrange
+            // 1. Налаштовуємо споживання (usage):
+            // Споживання 0.5 kWh
+            var devices = new List<Device> { new Device { IsOn = true, PowerUsageWatts = 500 } };
+            _deviceRepo.Setup(repo => repo.GetAll()).Returns(devices);
+
+            // 2. Налаштовуємо ліміт (plan):
+            // Ліміт 1.0 kWh (більше, ніж споживання)
+            var plan = new EnergyPlan { DailyLimitKwh = 1.0 };
+            _planRepo.Setup(repo => repo.GetCurrentPlan()).Returns(plan);
+
+            // Act
+            _service.CheckForOverload();
+
+            // Assert
+            // Перевіряємо, що _notify.SendAlert() НЕ був викликаний
+            // (Тип перевірки: Verify(..., Times.Never) - наш 11-й унікальний тип)
+            _notify.Verify(n => n.SendAlert(It.IsAny<string>()), Times.Never());
+        }
     }
 }
