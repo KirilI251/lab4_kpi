@@ -195,5 +195,29 @@ namespace SmartHomeTests
                 It.Is<EnergyPlan>(plan => plan.DailyLimitKwh == newLimit)
             ), Times.Once());
         }
+
+        /// <summary>
+        /// Тест перевіряє, що метод UpdateEnergyLimit викликає UpdatePlan
+        /// з будь-яким об'єктом типу EnergyPlan.
+        /// </summary>
+        [Fact]
+        public void UpdateEnergyLimit_ShouldCallUpdatePlan_WithAnyPlanObject()
+        {
+            // Arrange
+            double newLimit = 9.0;
+            var existingPlan = new EnergyPlan { DailyLimitKwh = 5.0 };
+            _planRepo.Setup(repo => repo.GetCurrentPlan()).Returns(existingPlan);
+
+            // Act
+            _service.UpdateEnergyLimit(newLimit);
+
+            // Assert
+            // Перевіряємо, що UpdatePlan був викликаний з будь-яким
+            // (не null) об'єктом типу EnergyPlan
+            // (Тип перевірки: It.IsAny<T>() - наш 14-й унікальний тип)
+            _planRepo.Verify(repo => repo.UpdatePlan(
+                It.IsAny<EnergyPlan>()
+            ), Times.Once());
+        }
     }
 }
