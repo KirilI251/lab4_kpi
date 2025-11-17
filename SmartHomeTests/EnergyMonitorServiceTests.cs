@@ -58,5 +58,33 @@ namespace SmartHomeTests
             // (Тип перевірки: Assert.Equal)
             Assert.Equal(expectedKwh, actualKwh);
         }
+
+        /// <summary>
+        /// Тест перевіряє, що розрахунок споживання повертає 0,
+        /// якщо всі пристрої вимкнені, незалежно від їх потужності.
+        /// </summary>
+        [Theory] // (Тип перевірки: [Theory])
+        [InlineData(1000, 500)] // (Тип перевірки: [InlineData]) - Сценарій 1
+        [InlineData(2000, 3000)] // Сценарій 2
+        [InlineData(0, 0)] // Сценарій 3
+        public void CalculateCurrentUsageKwh_ShouldReturnZero_WhenAllDevicesAreOff(double power1, double power2)
+        {
+            // Arrange
+            var devices = new List<Device>
+            {
+                new Device { IsOn = false, PowerUsageWatts = power1 },
+                new Device { IsOn = false, PowerUsageWatts = power2 }
+            };
+
+            _deviceRepo.Setup(repo => repo.GetAll()).Returns(devices);
+
+            double expectedKwh = 0.0;
+
+            // Act
+            double actualKwh = _service.CalculateCurrentUsageKwh();
+
+            // Assert
+            Assert.Equal(expectedKwh, actualKwh);
+        }
     }
 }
