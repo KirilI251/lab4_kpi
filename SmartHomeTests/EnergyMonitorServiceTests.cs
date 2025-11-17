@@ -141,5 +141,33 @@ namespace SmartHomeTests
             // (Тип перевірки: Verify(..., Times.Never) - наш 11-й унікальний тип)
             _notify.Verify(n => n.SendAlert(It.IsAny<string>()), Times.Never());
         }
+
+        /// <summary>
+        /// Тест перевіряє, що сповіщення про перевантаження містить
+        /// коректний текст (наприклад, "Overload detected").
+        /// </summary>
+        [Fact]
+        public void CheckForOverload_ShouldSendCorrectAlertMessage_WhenUsageExceedsLimit()
+        {
+            // Arrange
+            // 1. Налаштовуємо споживання (usage):
+            var devices = new List<Device> { new Device { IsOn = true, PowerUsageWatts = 1500 } }; // 1.5 kWh
+            _deviceRepo.Setup(repo => repo.GetAll()).Returns(devices);
+
+            // 2. Налаштовуємо ліміт (plan):
+            var plan = new EnergyPlan { DailyLimitKwh = 1.0 };
+            _planRepo.Setup(repo => repo.GetCurrentPlan()).Returns(plan);
+
+            // Act
+            _service.CheckForOverload();
+
+            // Assert
+            // Перевіряємо, що метод SendAlert був викликаний з рядком,
+            // який відповідає нашому предикату (містить "Overload detected")
+            // (Тип перевірки: It.Is<string>(predicate) - наш 12-й унікальний тип)
+            _notify.Verify(n => n.SendAlert(
+                It.Is<string>(msg => msg.Contains("Overload detected"))
+            ), Times.Once());
+        }
     }
 }
