@@ -86,5 +86,33 @@ namespace SmartHomeTests
             // Assert
             Assert.Equal(expectedKwh, actualKwh);
         }
+
+        /// <summary>
+        /// Тест перевіряє, що метод CheckForOverload відправляє сповіщення,
+        /// коли споживання енергії перевищує денний ліміт.
+        /// </summary>
+        [Fact]
+        public void CheckForOverload_ShouldSendAlert_WhenUsageExceedsLimit()
+        {
+            // Arrange
+            // 1. Налаштовуємо споживання (usage):
+            // Робимо так, щоб CalculateCurrentUsageKwh() повертав 1.5
+            var devices = new List<Device> { new Device { IsOn = true, PowerUsageWatts = 1500 } };
+            _deviceRepo.Setup(repo => repo.GetAll()).Returns(devices);
+
+            // 2. Налаштовуємо ліміт (plan):
+            // Встановлюємо ліміт 1.0 (менше, ніж споживання)
+            var plan = new EnergyPlan { DailyLimitKwh = 1.0 };
+            _planRepo.Setup(repo => repo.GetCurrentPlan()).Returns(plan);
+
+            // Act
+            _service.CheckForOverload();
+
+            // Assert
+            // Перевіряємо, що _notify.SendAlert() був викликаний 1 раз
+            // (Тип перевірки: Verify(..., Times.AtLeastOnce) або Times.Once)
+            // Це наш 10-й унікальний тип перевірки.
+            _notify.Verify(n => n.SendAlert(It.IsAny<string>()), Times.Once());
+        }
     }
 }
