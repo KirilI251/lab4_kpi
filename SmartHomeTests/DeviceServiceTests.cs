@@ -72,5 +72,30 @@ namespace SmartHomeTests
             // 2. Також перевіряємо, що Update було викликано
             _deviceRepo.Verify(repo => repo.Update(device), Times.Once());
         }
+
+        /// <summary>
+        /// Тест перевіряє, що метод ToggleDevice кидає виняток ArgumentException,
+        /// якщо пристрій із заданим id не знайдено.
+        /// </summary>
+        [Fact]
+        public void ToggleDevice_ShouldThrowArgumentException_WhenDeviceNotFound()
+        {
+            // Arrange
+            int nonExistentDeviceId = 99;
+
+            // Налаштовуємо мок-репозиторій:
+            // Коли буде викликаний GetById(99), він має повернути null
+            _deviceRepo.Setup(repo => repo.GetById(nonExistentDeviceId))
+                       .Returns((Device?)null); // Явно вказуємо, що повертаємо null
+
+            // Act & Assert
+            // Ми перевіряємо, що виклик методу _service.ToggleDevice
+            // призведе до винятку типу ArgumentException
+            // (Тип перевірки: Assert.Throws - наш 4-й унікальний тип)
+            Assert.Throws<ArgumentException>(() => _service.ToggleDevice(nonExistentDeviceId, true));
+
+            // Додаткова перевірка: переконатися, що Update НЕ викликався
+            _deviceRepo.Verify(repo => repo.Update(It.IsAny<Device>()), Times.Never());
+        }
     }
 }
