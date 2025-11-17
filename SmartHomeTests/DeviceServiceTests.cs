@@ -130,5 +130,31 @@ namespace SmartHomeTests
             // (Тип перевірки: Assert.Contains - 6-й унікальний тип)
             Assert.Contains(deviceOn, result);
         }
+
+        /// <summary>
+        /// Тест перевіряє, що метод GetActiveDevices повертає порожній список,
+        /// якщо немає увімкнених пристроїв.
+        /// </summary>
+        [Fact]
+        public void GetActiveDevices_ShouldReturnEmptyList_WhenNoDevicesAreOn()
+        {
+            // Arrange
+            var deviceOff1 = new Device { Id = 1, Name = "Lamp", IsOn = false };
+            var deviceOff2 = new Device { Id = 2, Name = "TV", IsOn = false };
+            var allDevices = new List<Device> { deviceOff1, deviceOff2 };
+
+            _deviceRepo.Setup(repo => repo.GetAll()).Returns(allDevices);
+
+            // Act
+            var result = _service.GetActiveDevices();
+
+            // Assert
+            // 1. Перевіряємо, що результат не 'null' (хороша практика)
+            Assert.NotNull(result);
+
+            // 2. Перевіряємо, що список порожній
+            // (Тип перевірки: Assert.Empty - наш 8-й унікальний тип)
+            Assert.Empty(result);
+        }
     }
 }
