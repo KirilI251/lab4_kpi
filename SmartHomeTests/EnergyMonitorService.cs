@@ -6,7 +6,7 @@ using Energy_Project.Services.Interfaces;
 using Moq;
 namespace SmartHomeTests
 {
-    public class EnergyMonitorService
+    public class EnergyMonitorServiceTests
     {
         private readonly Mock<IDeviceRepository> _deviceRepo = new();
         private readonly Mock<IEnergyPlanRepository> _planRepo = new();
